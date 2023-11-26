@@ -1,20 +1,14 @@
-trigger ContactTrigger on Contact (before update) {
+trigger ContactTrigger on Contact (after update) {
 
     Set<Id> accountIdsToDeactivate = new Set<Id>();
     Set<Id> accountIdsToActivate = new Set<Id>();
 
-    //static Boolean isExecuting = false;
-
-    //if (!isExecuting) {
-     //isExecuting = true;
-    // find deactivated
     for (Contact contact : Trigger.new) {
         if (contact.Activated__c == false && Trigger.oldMap.get(contact.Id).Activated__c == true) {
             accountIdsToDeactivate.add(contact.AccountId);
         }
     }
 
-    // find activated
     for (Contact contact : Trigger.new) {
         if (contact.Activated__c == true && Trigger.oldMap.get(contact.Id).Activated__c == false) {
             accountIdsToActivate.add(contact.AccountId);
@@ -38,6 +32,10 @@ trigger ContactTrigger on Contact (before update) {
             update accountsToUpdate;
         }
 
+        if (!contactsToUpdate.isEmpty()) {
+            update contactsToUpdate;
+        }
+
     } else if (!accountIdsToActivate.isEmpty()) {
         List<Account> accountsToUpdate = new List<Account>();
         List<Contact> contactsToUpdate = new List<Contact>();
@@ -55,11 +53,10 @@ trigger ContactTrigger on Contact (before update) {
             update accountsToUpdate;
         }
 
+        if (!contactsToUpdate.isEmpty()) {
+            update contactsToUpdate;
+        }
+
     }
-
-    // Reset the static variable
-    //isExecuting = false;
-
-//}
 
 }
